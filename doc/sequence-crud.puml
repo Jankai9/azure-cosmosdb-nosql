@@ -1,0 +1,66 @@
+@startuml CRUD-Sequences
+!theme plain
+
+actor "Caller" as Caller
+participant "App Helpers\n(src/app.ts)" as App
+participant "Config Loader\n(src/config.ts)" as Config
+participant "Cosmos Client\n(src/cosmosClient.ts)" as ClientFactory
+participant "Customer Repository\n(src/customerRepository.ts)" as Repo
+participant "Cosmos DB Container" as Container
+
+== Create Customer ==
+Caller -> App : createCustomer(customer, env?)
+App -> Config : loadCosmosConfig(env)
+App -> ClientFactory : createContainer(config)
+App -> Repo : new CustomerRepository(container)
+App -> Repo : create(customer)
+Repo -> Container : items.create(customer)
+Container --> Repo : resource
+Repo --> App : Customer
+App --> Caller : Customer
+
+== Get Customer ==
+Caller -> App : getCustomerById(id, env?)
+App -> Config : loadCosmosConfig(env)
+App -> ClientFactory : createContainer(config)
+App -> Repo : new CustomerRepository(container)
+App -> Repo : getById(id)
+Repo -> Container : item(id,id).read()
+Container --> Repo : resource | 404
+Repo --> App : Customer | null
+App --> Caller : Customer | null
+
+== Update Customer ==
+Caller -> App : updateCustomer(customer, env?)
+App -> Config : loadCosmosConfig(env)
+App -> ClientFactory : createContainer(config)
+App -> Repo : new CustomerRepository(container)
+App -> Repo : update(customer)
+Repo -> Container : item(id,id).replace(customer)
+Container --> Repo : resource
+Repo --> App : Customer
+App --> Caller : Customer
+
+== Delete Customer ==
+Caller -> App : deleteCustomer(id, env?)
+App -> Config : loadCosmosConfig(env)
+App -> ClientFactory : createContainer(config)
+App -> Repo : new CustomerRepository(container)
+App -> Repo : delete(id)
+Repo -> Container : item(id,id).delete()
+Container --> Repo : ok
+Repo --> App : void
+App --> Caller : void
+
+== List Customers ==
+Caller -> App : listCustomers(env?)
+App -> Config : loadCosmosConfig(env)
+App -> ClientFactory : createContainer(config)
+App -> Repo : new CustomerRepository(container)
+App -> Repo : list()
+Repo -> Container : items.query("SELECT * FROM c").fetchAll()
+Container --> Repo : resources[]
+Repo --> App : Customer[]
+App --> Caller : Customer[]
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml Architecture
+!theme plain
+skinparam componentStyle rectangle
+
+actor "User" as User
+
+package "Node.js App" {
+  [CLI (src/cli.ts)] as CLI
+  [App Helpers (src/app.ts)] as App
+  [Config Loader (src/config.ts)] as Config
+  [Cosmos Client Factory (src/cosmosClient.ts)] as ClientFactory
+  [Customer Repository (src/customerRepository.ts)] as Repo
+}
+
+node "Azure Cosmos DB" as Cosmos {
+  database "Database: customer-db" as Db
+  collections "Container: customers" as Container
+}
+
+User --> CLI : run
+CLI --> App : storeSampleCustomer()
+App --> Config : loadCosmosConfig()
+App --> ClientFactory : createContainer(config)
+ClientFactory --> Cosmos : connect
+App --> Repo : new CustomerRepository(container)
+Repo --> Container : CRUD operations
+
+@enduml

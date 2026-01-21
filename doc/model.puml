@@ -1,0 +1,45 @@
+@startuml Model
+!theme plain
+
+class Customer {
+  +id: string
+  +name: string
+  +email: string
+  +loyaltyTier?: string
+}
+
+class CustomerRepository {
+  -container: Container
+  +create(customer: Customer): Promise<Customer>
+  +getById(id: string): Promise<Customer | null>
+  +update(customer: Customer): Promise<Customer>
+  +delete(id: string): Promise<void>
+  +list(): Promise<Customer[]>
+}
+
+class CosmosConfig {
+  +endpoint: string
+  +key: string
+  +databaseId: string
+  +containerId: string
+}
+
+class AppHelpers {
+  +createCustomer(customer: Customer, env?: ProcessEnv): Promise<Customer>
+  +getCustomerById(id: string, env?: ProcessEnv): Promise<Customer | null>
+  +updateCustomer(customer: Customer, env?: ProcessEnv): Promise<Customer>
+  +deleteCustomer(id: string, env?: ProcessEnv): Promise<void>
+  +listCustomers(env?: ProcessEnv): Promise<Customer[]>
+  +storeSampleCustomer(env?: ProcessEnv): Promise<Customer>
+}
+
+class CosmosClientFactory {
+  +createContainer(config: CosmosConfig): Container
+}
+
+AppHelpers --> CosmosClientFactory
+AppHelpers --> CosmosConfig
+AppHelpers --> CustomerRepository
+CustomerRepository --> Customer
+
+@enduml
