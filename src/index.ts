@@ -1,4 +1,11 @@
-export { storeSampleCustomer } from "./app";
+export {
+	createCustomer,
+	deleteCustomer,
+	getCustomerById,
+	listCustomers,
+	storeSampleCustomer,
+	updateCustomer
+} from "./app";
 export { createContainer } from "./cosmosClient";
 export { loadCosmosConfig } from "./config";
 export { CustomerRepository } from "./customerRepository";

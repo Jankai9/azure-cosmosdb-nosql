@@ -31,7 +31,7 @@ describe("Cosmos DB e2e", () => {
     await purgeContainer();
   });
 
-  it("stores a customer in the real database", async () => {
+  it("performs CRUD operations in the real database", async () => {
     const repository = new CustomerRepository(container);
     const customer: Customer = {
       id: `e2e-${Date.now()}`,
@@ -40,8 +40,22 @@ describe("Cosmos DB e2e", () => {
     };
 
     const stored = await repository.create(customer);
-
     expect(stored.id).toBe(customer.id);
-    expect(stored.email).toBe(customer.email);
+
+    const fetched = await repository.getById(customer.id);
+    expect(fetched?.email).toBe(customer.email);
+
+    const updated = await repository.update({
+      ...customer,
+      loyaltyTier: "silver"
+    });
+    expect(updated.loyaltyTier).toBe("silver");
+
+    const list = await repository.list();
+    expect(list.some((item) => item.id === customer.id)).toBe(true);
+
+    await repository.delete(customer.id);
+    const missing = await repository.getById(customer.id);
+    expect(missing).toBeNull();
   });
 });
